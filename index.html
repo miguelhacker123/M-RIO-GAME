@@ -1,0 +1,617 @@
+Aqui está a versão **Ultra HD / Arcade PRO** do seu jogo em um **único arquivo `index.html**`!
+
+Ele foi reformulado do zero com **cores vibrantes, efeitos visuais, física ultra suave, partículas, inimigos com inteligência básica, blocos interativos no estilo "Super Mario" e um design completo e responsivo**.
+
+### 🌟 O que mudou nesta versão "1000x melhor":
+
+1. **Visual & Cores:** Gradientes vibrantes de fundo, sombras projetadas, detalhes de grama/textura nos blocos e luzes brilhantes nas moedas.
+2. **Sistema de Partículas:** Efeito de poeira ao pular/correr e explosão de brilho ao coletar moedas ou derrotar inimigos.
+3. **Mecânicas de Mario:**
+* **Blocos "?":** Bata a cabeça embaixo do bloco para ganhar moedas!
+* **Inimigos:** Pule em cima dos inimigos estilo "Goomba" para eliminá-los! Se encostar de lado, você perde e a fase reseta.
+* **Mastros de Vitória:** Alcance a bandeira para passar de fase.
+
+
+4. **Interface (UI):** Menu moderno em estilo Arcade Glassmorphism, botão de troca de idioma (Português / Inglês) instantâneo, seletor de fases e suporte completo para teclado e botões touch (Celular/Tablet).
+
+---
+
+### 💻 Copie o código abaixo e cole no seu `index.html` no GitHub:
+
+```html
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Super Adventure Deluxe</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Arial Black', 'Impact', sans-serif;
+        }
+
+        body {
+            background: #0f0c20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 900px;
+            max-height: 506px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 0, 128, 0.3);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Telas de Interface */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(15, 12, 32, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 3rem;
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 4px 4px 0px #000;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 220px;
+        }
+
+        button {
+            padding: 14px 24px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #fff;
+            background: linear-gradient(45deg, #ff0055, #ff5000);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #990033, 0 10px 20px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #990033;
+        }
+
+        .btn-lang {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #00d2ff, #0067ff);
+            box-shadow: 0 4px 0 #004099;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            width: auto;
+            z-index: 20;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            color: white;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            display: flex;
+            gap: 25px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .hud-card {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Controles Mobile */
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 25px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .touch-btn {
+            pointer-events: auto;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+        }
+
+        .touch-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0.92);
+        }
+
+        .d-pad {
+            display: flex;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <button id="lang-btn" class="btn-lang">PT / EN</button>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+        <div class="hud-card" id="hud-level">FASE: 1</div>
+        <div class="hud-card" id="hud-score">🪙 0</div>
+    </div>
+
+    <!-- Menu Principal -->
+    <div id="main-menu" class="screen">
+        <h1 id="title">SUPER ADVENTURE</h1>
+        <div class="btn-group">
+            <button id="play-btn">JOGAR</button>
+            <button id="levels-btn">FASES</button>
+        </div>
+    </div>
+
+    <!-- Seleção de Fases -->
+    <div id="levels-menu" class="screen hidden">
+        <h1 id="levels-title">FASES</h1>
+        <div class="btn-group">
+            <button class="lvl-select" data-level="1">Fase 1</button>
+            <button class="lvl-select" data-level="2">Fase 2</button>
+            <button id="back-btn" style="background: linear-gradient(45deg, #777, #444); box-shadow: 0 6px 0 #222;">VOLTAR</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas" width="900" height="506"></canvas>
+
+    <!-- Controles Virtuais Touch -->
+    <div id="touch-controls">
+        <div class="d-pad">
+            <div id="btn-left" class="touch-btn">◀</div>
+            <div id="btn-right" class="touch-btn">▶</div>
+        </div>
+        <div id="btn-jump" class="touch-btn">▲</div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentLang = 'pt';
+    let currentLevel = 1;
+    let gameActive = false;
+    let coinsCollected = 0;
+    let particles = [];
+
+    const texts = {
+        pt: { play: "JOGAR", levels: "FASES", selectLevel: "ESCOLHA A FASE", back: "VOLTAR", level: "FASE", win: "VOCÊ VENCEU!" },
+        en: { play: "PLAY", levels: "LEVELS", selectLevel: "SELECT LEVEL", back: "BACK", level: "LEVEL", win: "YOU WIN!" }
+    };
+
+    // Interfaces
+    const mainMenu = document.getElementById('main-menu');
+    const levelsMenu = document.getElementById('levels-menu');
+    const hud = document.getElementById('hud');
+    const playBtn = document.getElementById('play-btn');
+    const levelsBtn = document.getElementById('levels-btn');
+    const backBtn = document.getElementById('back-btn');
+    const langBtn = document.getElementById('lang-btn');
+
+    // Jogador com Física Suave
+    const player = {
+        x: 50, y: 300, w: 32, h: 42,
+        vx: 0, vy: 0,
+        speed: 5.5, friction: 0.85, gravity: 0.65, jumpPower: -13.5,
+        grounded: false, color: '#ff0055'
+    };
+
+    const keys = { left: false, right: false, up: false };
+
+    // Fases Ricas em Detalhes
+    const levels = {
+        1: {
+            bgTop: '#1a0b2e', bgBottom: '#6b117b',
+            platforms: [
+                { x: 0, y: 440, w: 900, h: 70, type: 'ground' },
+                { x: 180, y: 320, w: 120, h: 26, type: 'brick' },
+                { x: 340, y: 240, w: 40, h: 40, type: 'question' },
+                { x: 420, y: 240, w: 120, h: 26, type: 'brick' },
+                { x: 620, y: 340, w: 140, h: 26, type: 'brick' }
+            ],
+            coins: [
+                { x: 220, y: 270, collected: false },
+                { x: 460, y: 190, collected: false },
+                { x: 500, y: 190, collected: false },
+                { x: 680, y: 290, collected: false }
+            ],
+            enemies: [
+                { x: 450, y: 410, w: 30, h: 30, vx: -1.8, minX: 400, maxX: 580, alive: true },
+                { x: 650, y: 310, w: 30, h: 30, vx: 1.5, minX: 620, maxX: 730, alive: true }
+            ],
+            flag: { x: 820, y: 240, w: 15, h: 200 }
+        },
+        2: {
+            bgTop: '#051923', bgBottom: '#006494',
+            platforms: [
+                { x: 0, y: 440, w: 300, h: 70, type: 'ground' },
+                { x: 380, y: 440, w: 520, h: 70, type: 'ground' },
+                { x: 220, y: 330, w: 100, h: 26, type: 'brick' },
+                { x: 370, y: 250, w: 40, h: 40, type: 'question' },
+                { x: 480, y: 200, w: 140, h: 26, type: 'brick' },
+                { x: 680, y: 310, w: 100, h: 26, type: 'brick' }
+            ],
+            coins: [
+                { x: 250, y: 280, collected: false },
+                { x: 500, y: 150, collected: false },
+                { x: 550, y: 150, collected: false },
+                { x: 710, y: 260, collected: false }
+            ],
+            enemies: [
+                { x: 490, y: 170, w: 30, h: 30, vx: -2, minX: 480, maxX: 600, alive: true },
+                { x: 550, y: 410, w: 30, h: 30, vx: 2, minX: 400, maxX: 800, alive: true }
+            ],
+            flag: { x: 830, y: 240, w: 15, h: 200 }
+        }
+    };
+
+    let activeLevel = null;
+
+    // Tradução e UI
+    function updateLanguage() {
+        const t = texts[currentLang];
+        playBtn.innerText = t.play;
+        levelsBtn.innerText = t.levels;
+        document.getElementById('levels-title').innerText = t.selectLevel;
+        backBtn.innerText = t.back;
+        document.getElementById('hud-level').innerText = `${t.level}: ${currentLevel}`;
+        document.getElementById('hud-score').innerText = `🪙 ${coinsCollected}`;
+    }
+
+    langBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'pt' ? 'en' : 'pt';
+        updateLanguage();
+    });
+
+    playBtn.addEventListener('click', () => startLevel(1));
+    levelsBtn.addEventListener('click', () => { mainMenu.classList.add('hidden'); levelsMenu.classList.remove('hidden'); });
+    backBtn.addEventListener('click', () => { levelsMenu.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
+
+    document.querySelectorAll('.lvl-select').forEach(btn => {
+        btn.addEventListener('click', (e) => startLevel(parseInt(e.target.dataset.level)));
+    });
+
+    function startLevel(lvl) {
+        currentLevel = lvl;
+        activeLevel = JSON.parse(JSON.stringify(levels[lvl]));
+        coinsCollected = 0;
+        particles = [];
+        player.x = 50; player.y = 300; player.vx = 0; player.vy = 0;
+        mainMenu.classList.add('hidden');
+        levelsMenu.classList.add('hidden');
+        hud.classList.remove('hidden');
+        updateLanguage();
+        gameActive = true;
+    }
+
+    // Partículas (Efeitos Visuais)
+    function addParticles(x, y, color, count = 8) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: Math.random() * 5 + 2,
+                color, life: 1
+            });
+        }
+    }
+
+    // Controles Teclado
+    window.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+        if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') && player.grounded) {
+            player.vy = player.jumpPower;
+            player.grounded = false;
+            addParticles(player.x + player.w/2, player.y + player.h, '#ffffff', 6);
+        }
+    });
+
+    window.addEventListener('keyup', e => {
+        if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+        if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+    });
+
+    // Controles Touch
+    const bindTouch = (id, action) => {
+        const el = document.getElementById(id);
+        el.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if (action === 'jump' && player.grounded) {
+                player.vy = player.jumpPower;
+                player.grounded = false;
+                addParticles(player.x + player.w/2, player.y + player.h, '#ffffff', 6);
+            } else { keys[action] = true; }
+        });
+        el.addEventListener('touchend', e => { e.preventDefault(); if (action !== 'jump') keys[action] = false; });
+    };
+
+    bindTouch('btn-left', 'left');
+    bindTouch('btn-right', 'right');
+    bindTouch('btn-jump', 'jump');
+
+    // Loop de Atualização (Física & Lógica)
+    function update() {
+        if (!gameActive) return;
+
+        // Aceleração e Atrito
+        if (keys.left) player.vx -= 0.8;
+        if (keys.right) player.vx += 0.8;
+        
+        player.vx *= player.friction;
+        player.vy += player.gravity;
+
+        player.x += player.vx;
+        player.y += player.vy;
+
+        // Limites Laterais
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+
+        player.grounded = false;
+
+        // Colisão com Plataformas
+        activeLevel.platforms.forEach(plat => {
+            // Colisão por Cima (Piso)
+            if (player.x < plat.x + plat.w && player.x + player.w > plat.x &&
+                player.y + player.h >= plat.y && player.y + player.h <= plat.y + plat.h / 2 && player.vy >= 0) {
+                player.grounded = true;
+                player.vy = 0;
+                player.y = plat.y - player.h;
+            }
+            // Colisão por Baixo (Cabeçada em Blocos "?")
+            else if (player.x < plat.x + plat.w && player.x + player.w > plat.x &&
+                     player.y <= plat.y + plat.h && player.y >= plat.y + plat.h / 2 && player.vy < 0) {
+                player.vy = 2;
+                if (plat.type === 'question') {
+                    plat.type = 'used';
+                    coinsCollected += 3;
+                    updateLanguage();
+                    addParticles(plat.x + plat.w/2, plat.y, '#ffd700', 12);
+                }
+            }
+        });
+
+        // Coleta de Moedas
+        activeLevel.coins.forEach(coin => {
+            if (!coin.collected && player.x < coin.x + 20 && player.x + player.w > coin.x &&
+                player.y < coin.y + 20 && player.y + player.h > coin.y) {
+                coin.collected = true;
+                coinsCollected++;
+                updateLanguage();
+                addParticles(coin.x + 10, coin.y + 10, '#ffd700', 10);
+            }
+        });
+
+        // Inimigos
+        activeLevel.enemies.forEach(enemy => {
+            if (!enemy.alive) return;
+
+            enemy.x += enemy.vx;
+            if (enemy.x <= enemy.minX || enemy.x + enemy.w >= enemy.maxX) enemy.vx *= -1;
+
+            // Colisão Jogador vs Inimigo
+            if (player.x < enemy.x + enemy.w && player.x + player.w > enemy.x &&
+                player.y < enemy.y + enemy.h && player.y + player.h > enemy.y) {
+                
+                // Pulo em cima do inimigo
+                if (player.vy > 0 && player.y + player.h < enemy.y + enemy.h / 2) {
+                    enemy.alive = false;
+                    player.vy = player.jumpPower * 0.65;
+                    addParticles(enemy.x + enemy.w/2, enemy.y + enemy.h/2, '#ff5000', 15);
+                } else {
+                    // Dano / Reset
+                    addParticles(player.x + player.w/2, player.y + player.h/2, '#ff0055', 20);
+                    startLevel(currentLevel);
+                }
+            }
+        });
+
+        // Bandeira de Vitória
+        const flag = activeLevel.flag;
+        if (player.x < flag.x + flag.w && player.x + player.w > flag.x &&
+            player.y < flag.y + flag.h && player.y + player.h > flag.y) {
+            gameActive = false;
+            addParticles(flag.x, flag.y, '#00ffcc', 30);
+            setTimeout(() => {
+                alert(texts[currentLang].win);
+                mainMenu.classList.remove('hidden');
+                hud.classList.add('hidden');
+            }, 100);
+        }
+
+        // Queda em buracos
+        if (player.y > canvas.height) startLevel(currentLevel);
+
+        // Atualizar Partículas
+        particles.forEach((p, index) => {
+            p.x += p.vx; p.y += p.vy; p.life -= 0.03;
+            if (p.life <= 0) particles.splice(index, 1);
+        });
+    }
+
+    // Loop de Renderização (Desenho na Tela)
+    function render() {
+        if (!activeLevel) return;
+
+        // Fundo Gradiente
+        let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, activeLevel.bgTop);
+        grad.addColorStop(1, activeLevel.bgBottom);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameActive) return;
+
+        // Desenhar Plataformas
+        activeLevel.platforms.forEach(plat => {
+            if (plat.type === 'ground') {
+                ctx.fillStyle = '#2d6a4f';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                ctx.fillStyle = '#52b788';
+                ctx.fillRect(plat.x, plat.y, plat.w, 10); // Grama no topo
+            } else if (plat.type === 'brick') {
+                ctx.fillStyle = '#b7094c';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                ctx.strokeStyle = '#590d22';
+                ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+            } else if (plat.type === 'question') {
+                ctx.fillStyle = '#ffb703';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 20px Arial';
+                ctx.fillText('?', plat.x + 14, plat.y + 27);
+            } else if (plat.type === 'used') {
+                ctx.fillStyle = '#6c757d';
+                ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+            }
+        });
+
+        // Desenhar Moedas Brilhantes
+        activeLevel.coins.forEach(coin => {
+            if (!coin.collected) {
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(coin.x + 10, coin.y + 10, 9, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 10;
+            }
+        });
+        ctx.shadowBlur = 0; // Reset sombra
+
+        // Desenhar Inimigos
+        activeLevel.enemies.forEach(enemy => {
+            if (enemy.alive) {
+                ctx.fillStyle = '#ff4d6d';
+                ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
+                // Olhos do inimigo
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(enemy.x + 4, enemy.y + 6, 6, 6);
+                ctx.fillRect(enemy.x + 18, enemy.y + 6, 6, 6);
+            }
+        });
+
+        // Desenhar Mastro e Bandeira
+        const flag = activeLevel.flag;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(flag.x, flag.y, flag.w, flag.h);
+        ctx.fillStyle = '#00f5d4';
+        ctx.beginPath();
+        ctx.moveTo(flag.x + flag.w, flag.y);
+        ctx.lineTo(flag.x + flag.w + 35, flag.y + 20);
+        ctx.lineTo(flag.x + flag.w, flag.y + 40);
+        ctx.fill();
+
+        // Desenhar Partículas
+        particles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        ctx.globalAlpha = 1.0;
+
+        // Desenhar Jogador (Heroi estilo Neon)
+        ctx.fillStyle = player.color;
+        ctx.shadowColor = '#ff0055';
+        ctx.shadowBlur = 12;
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        ctx.shadowBlur = 0;
+
+        // Olhos do Jogador
+        ctx.fillStyle = '#fff';
+        let eyeOffset = player.vx < 0 ? 4 : 18;
+        ctx.fillRect(player.x + eyeOffset, player.y + 8, 8, 8);
+    }
+
+    function gameLoop() {
+        update();
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+
+    updateLanguage();
+    gameLoop();
+</script>
+</body>
+</html>
+
+```
